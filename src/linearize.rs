@@ -10,10 +10,10 @@ pub fn parse(input: &Vec<char>) -> Vec<Vec<u32>> {
     let mut bases = vec![];
     let mut extensions = vec![];
 
-    for ;; {
+    while true {
         match lex::next_token(input, cur, symbols, cur_idx) {
             lex::Token::Contract => (),
-            lex::Token::NoMatch => break;
+            lex::Token::NoToken => break,
             _ => panic!("Invalid inheritance hierarchy")
         }
         let old = *cur_idx;
@@ -28,16 +28,16 @@ pub fn parse(input: &Vec<char>) -> Vec<Vec<u32>> {
         }
         let mut is = false;
         match lex::next_token(input, cur, symbols, cur_idx) {
-            lex::Token::Is => is = true;
+            lex::Token::Is => is = true,
             lex::Token::EndLine => (),
-            lex::Token::NoMatch => break;
+            lex::Token::NoToken => break,
             _ => panic!("Invalid inheritance hierarchy")
         }
         if is {
-            extensions.push(parse_contract_list(input, cur)); 
+            extensions.push(parse_contract_list(input, cur, symbols, cur_idx)); 
         }
     }
-    linearize(bases, extensions)
+    linearize_hierarchy(bases, extensions)
 }
 
 // Parse a list of contracts
@@ -46,10 +46,10 @@ fn parse_contract_list(
     cur: &mut usize, 
     symbols: &mut HashMap<String, u32>, 
     cur_idx: &mut u32
-) -> <Vec<u32> {
+) -> Vec<u32> {
     let old = *cur_idx;
     let mut result = vec![];
-    for ;; {
+    while true {
         match lex::next_token(input, cur, symbols, cur_idx) {
             lex::Token::Identifier(id) => result.push(id),
             _ => panic!("Invalid contract list")
@@ -62,7 +62,26 @@ fn parse_contract_list(
     if old != *cur_idx {
         panic!("Identifier has not been defined");
     }
-
+    result
 }
 
-fn linearize(bases: Vec<u32>, extensions: Vec<Vec<u32>>) -> Vec<Vec<u32>> { vec![vec![]] }
+fn linearize_hierarchy(bases: Vec<u32>, extensions: Vec<Vec<u32>>) -> Vec<Vec<u32>> { 
+    let mut result = vec![];
+    if bases.len() != extensions.len() {
+        panic!("Invalid hierarchy");
+    }
+    result
+}
+
+fn linearize(front: u32, mut list: Vec<u32>) -> Vec<u32> {
+    let merged = merge(&list);
+    list.insert(0, front);
+    list
+}
+
+fn merge(list: &Vec<u32>) -> Vec<u32> { vec![] }
+
+#[cfg(test)]
+mod tests {
+
+}
